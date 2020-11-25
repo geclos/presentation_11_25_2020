@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+    <style>
+      .serif {
+        font-family: serif;
+      }
+
+      .italic {
+        font-style: italic;
+      }
+
+      .small {
+        font-size: .55em;
+      }
+
+      .code {
+        line-height: 1.2;
+      }
+    </style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown>
+          <textarea data-template>
+            # AccessGroups
+            # 💁💁
+          </textarea>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            ## It's a group...
+          </textarea>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            ## ... of Accesses 🥁
+          </textarea>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            ### Manual groups
+
+            The vegan group 🥗
+            - Hellen
+            - Bob
+            - Edward
+          </textarea>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            `AccessGroup <-- Membership --> Access`
+          </textarea>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            ### Dynamic groups
+            - Everybody
+            - Development team members
+            - Admins
+          </textarea>
+        </section>
+        <section>
+          Dynamic groups are <span class='italic serif'>extensible</span>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            - Marketing team recent hires
+            - Junior developers
+            - Accesses with shirt-size "M"
+          </textarea>
+        </section>
+        <section>
+          Dynamic groups can be relative to a <span class='italic serif'>company</span> or an <span class='italic serif'>access</span>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            - Bob's managers
+            - Hellen's reportees
+            - Edward's team leaders
+          </textarea>
+        </section>
+        <section>
+          <pre class='small'>
+            <code class='code small'>
+              class AccessGroup < ApplicationRecord
+                class Strategy < T::Enum
+                  enums do
+                    Self = new # Returns the same access
+                    Admins = new # Returns all admins in a company
+                    Basics = new # Returns all basics in a company
+                    Manager = new # Returns the manager of an access
+                    Members = new # Returns the members of access groups defined by the `accesses` relationship
+                    Everyone = new # Returns all accesses in a company
+                    TeamLead = new # If groupable is a Team, it returns the team leaders of this team.
+                    Groupable = new # Returns the accesses in groupable
+                    TimeoffManager = new # Returns the timeoff manager of an access
+                    Peers = new # Returns the team members of an access' teams, excluding his managers.
+                  end
+                end
+
+                # How should I get the accesses?
+                validates :strategy, inclusion: { in: Strategy.values.map(&:serialize) }
+
+                # Dynamic groups: Teams, Legal entities, Permission groups...
+                belongs_to :groupable, polymorphic: true
+
+                # Manual groups
+                has_many :memberships, class_name: 'AccessGroupMembership'
+                has_many :accesses, through: :memberships, class_name: 'Access'
+
+                def from_company(company)
+                  FindAccessesForAccessGroup.new(access_group: self).from_company(company)
+                end
+
+                def from_access(access)
+                  FindAccessesForAccessGroup.new(access_group: self).from_access(access)
+                end
+              end
+            </code>
+          </pre>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+            DEMO
+          </textarea>
+        </section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
